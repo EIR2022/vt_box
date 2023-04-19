@@ -12,7 +12,7 @@ se familiarice con los temas de virtualización muy demandados el día de hoy, c
 diferentes formas que pueden utilizarse en linux para poder crear hipervisores de máquinas
 virtuales y pueda aplicar los conocimientos en un futuro profesional de sistemas.
 
-## Dependencias del sistema
+## Dependencias
 * Verifica si tu procesador admite la virtualización y si está habilitada. Puedes verificarlo ejecutando el siguiente comando en una terminal:
     ```bash
     egrep -c '(vmx|svm)' /proc/cpuinfo
@@ -31,4 +31,24 @@ virtuales y pueda aplicar los conocimientos en un futuro profesional de sistemas
     ```bash 
     sudo usermod -aG kvm $USER
     sudo usermod -aG libvirt $USER
+    ```
+* Utilizado para eventos de configuracion avanzada e interfaz de energia
+    ```bash
+    sudo apt-get install -y acpid
+    ```
+* Se debe de instalar la biblioteca `libvirt-python` para poder interactuar con libvirt desde Python
+    ````bash
+    sudo apt-get install python3-libvirt
+    ````
+## Adicional
+
+* Para cargar la imagen debe de ser con extencion `.qcow2` si solo cuentas con el ISO puedes utilizar el siguiente comando para convertirlo 
+
+    ```bash 
+    qemu-img convert -f raw -O qcow2 /ruta/del/archivo.iso /ruta/destino/imagen.qcow2
+    ```
+*  En caso de no contar con gemu-img puedes instalarlo con la siguiente linea de comandos
+    ```bash
+    sudo apt-get update
+    sudo apt-get install qemu-utils
     ```

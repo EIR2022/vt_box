@@ -1,1 +1,4 @@
 .env
+venv/
+src/client/__pycache__
+src/vt_box/__pycache__
