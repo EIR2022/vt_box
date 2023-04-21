@@ -18,7 +18,7 @@ class MainWindow(tk.Frame):
         self.start_button.pack(fill= tk.X)
         self.list_button = tk.Button(self, text="Listar", command=self.show_window_tolist_mv)
         self.list_button.pack(fill= tk.X)
-        self.remove_button = tk.Button(self, text="Eliminar", command=self.show_window_remove_mv)
+        self.remove_button = tk.Button(self, text="Detener", command=self.show_window_remove_mv)
         self.remove_button.pack(fill= tk.X)
 
     def show_window_create_mv(self):
@@ -129,6 +129,8 @@ class BootWindow(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        label = tk.Label(self, text="Preciona Doble click Para Ejecutar o Visualizar")
+        label.pack()
         scrollbar = ttk.Scrollbar(self.master, orient=tk.VERTICAL)
         self.vm_listbox = tk.Listbox(self.master, yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.vm_listbox.yview)
@@ -139,13 +141,31 @@ class BootWindow(tk.Frame):
 
     def refresh_listbox(self):
         self.vm_listbox.delete(0, tk.END)
-        vms = self.vm.get_vms_active()
+        vms = self.vm.list_domains()
         for vm in vms:
-            self.vm_listbox.insert(tk.END, vm['name'])
+            state = self.vm.get_vm_state(vm)
+            description_state = ''
+            if state == 0: description_state = 'INDEFINIDO'
+            if state == 1: description_state = 'EJECUCION'
+            if state == 2: description_state = 'BLOCKEADA'
+            if state == 3: description_state = 'PAUSA'
+            if state == 4: description_state = 'DETENIDA'
+            if state == 5: description_state = 'DETENIDA'
+            if state == 6: description_state = 'CHRASED'
+            self.vm_listbox.insert(tk.END, vm+'=>'+description_state)
     
     def connect_vm(self, event):
         selected_vm = self.vm_listbox.get(self.vm_listbox.curselection())
-        self.vm.connect_to_vm(selected_vm)
+        name = selected_vm.split("=>")
+        isActive = self.vm.get_vm_state(name[0])
+        print(isActive)
+        if isActive == 4 or isActive ==5:
+            self.vm.start_vm(name[0])
+            isActive = self.vm.get_vm_state(name[0])
+            messagebox.showinfo("Éxito", "Se arranco correctamente la maquina "+name[0])
+            
+        if isActive == 1: 
+            self.vm.connect_to_vm(name[0])
 
 class RemoveWindow(tk.Frame): 
     def __init__(self, master=None):
@@ -157,6 +177,8 @@ class RemoveWindow(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        label = tk.Label(self, text="Selecciona una y presiona Stop")
+        label.pack()
         self.listbox = tk.Listbox(self.master)
         self.listbox.pack(side="top", fill="both", expand=True)
         
@@ -196,6 +218,8 @@ class ListWindow(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        label = tk.Label(self, text="Selecciona y Presiona Doble Click para ver el Detalle")
+        label.pack()
         scrollbar = ttk.Scrollbar(self.master, orient=tk.VERTICAL)
         self.vm_listbox = tk.Listbox(self.master, yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.vm_listbox.yview)
@@ -229,7 +253,15 @@ class VMInfoWindow:
     def get_vm_info(self):
         vm_info = self.vm.get_vm_info(self.vm_name) 
         vm_info_str = "Nombre: {}\n".format(vm_info['name'])
-        vm_info_str += "\nEstado: {}\n".format(vm_info['state'])
+        description_state = ''
+        if vm_info['state'] == 0: description_state = 'INDEFINIDO'
+        if vm_info['state'] == 1: description_state = 'EJECUCION'
+        if vm_info['state'] == 2: description_state = 'BLOCKEADA'
+        if vm_info['state'] == 3: description_state = 'PAUSA'
+        if vm_info['state'] == 4: description_state = 'DETENIDA'
+        if vm_info['state'] == 5: description_state = 'DETENIDA'
+        if vm_info['state'] == 6: description_state = 'CHRASED' 
+        vm_info_str += "\nEstado: {}\n".format(description_state)
         vm_info_str += "\nMax_men: {}\n".format(vm_info['max_mem'])
         vm_info_str += "\nNum_VCPUS: {}\n".format(vm_info['num_vcpus'])
         vm_info_str += "\nUUID: {}\n".format(vm_info['uuid'])
